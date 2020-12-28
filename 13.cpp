@@ -14,7 +14,7 @@ uint64_t lines[] =
 
 int main(void)
 {
-	uint64_t t = 100000000000403;
+	uint64_t t = 200000000000333;
 	uint64_t step = 523;
 	uint64_t count = 0;
 
