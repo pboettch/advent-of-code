@@ -2,7 +2,7 @@
 
 from typing import List
 
-instr = [line.rstrip().split(' = ') for line in open("14.input").readlines()]
+instr = [line.rstrip().split(' = ') for line in open("14-adri.input").readlines()]
 
 mem = {}
 

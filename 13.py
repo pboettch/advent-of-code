@@ -63,7 +63,7 @@ def find_match(seq: List[int], offset: int = 0):
 
     for i, n in enumerate(seq):
         if n != 0:
-            print('x %', n, '=', i)
+            print('x %', n, '=', n - i)
             num.append(n)
             rem.append(n - i)
 
