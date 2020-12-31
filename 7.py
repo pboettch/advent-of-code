@@ -9,7 +9,7 @@ G = nx.DiGraph()
 for rule in open('7.input').readlines():
     rule = rule.rstrip()
     match = rule_re.findall(rule)
-    print(match)
+    # print(match)
 
     name = match[0][1]
     G.add_node(name)
@@ -21,13 +21,10 @@ for rule in open('7.input').readlines():
 count = len(nx.ancestors(G, 'shiny gold'))
 print('shiny gold containers', count)
 
-count = 1
-
 def get_bags(g: nx.DiGraph, node: str):
-
     count = 1
     for n in g.neighbors(node):
-        print(node, n, g.get_edge_data(node, n)['amount'])
+        # print(node, n, g.get_edge_data(node, n)['amount'])
         count += g.get_edge_data(node, n)['amount'] * get_bags(g, n)
 
     return count
