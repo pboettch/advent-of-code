@@ -16,12 +16,13 @@ def to_int(line: str):
 
 
 class Tile:
-    def __init__(self, id: int, n, s, w, e):
+    def __init__(self, id: int, n, s, w, e, image):
         self._id = id
         self._north = n
         self._south = s
         self._east = e
         self._west = w
+        self._image = image
 
     @property
     def n(self):
@@ -39,12 +40,15 @@ class Tile:
     def w(self):
         return self._west
 
+    @property
+    def image(self):
+        return self._image
+
     def print(self):
         print(f" {self.n:>010b}")
         for e, w in zip(f"{self.e:>010b}", f"{self.w:>010b}"):
             print(f"{w}          {e}")
         print(f" {self.s:>010b}")
-
 
     @property
     def id(self):
@@ -60,34 +64,33 @@ class Tile:
 class TileGenerator:
     def __init__(self, id: int, data: List[str]):
         self._id = id
-
-        assert len(data) == 10
-        assert len(data[0]) == 10
-
-
-        self._north = data[0]
-        self._south = data[-1]
-        self._west = [line[0] for line in data]
-        self._east = [line[-1] for line in data]
-
-        # print(self._north, self._east, self._south, self._west)
+        self._data = data
 
     @property
     def id(self):
         return self._id
 
-    # 90° - counter-clockwise
+    @property
+    def data(self):
+        return self._data
+
+    # 90° - clockwise
     def rotate(self):
-        self._east, self._south, self._west, self._north = \
-            self._south[::-1], self._west, self._north[::-1], self._east
+        # https://stackoverflow.com/questions/8421337/rotating-a-two-dimensional-array-in-python
+        self._data = list(zip(*self._data[::-1]))
 
     def flip(self):
-        self._east, self._south, self._west, self._north = \
-             self._west, self._south[::-1], self._east, self._north[::-1]
-        pass
+        self._data = [list(reversed(line)) for line in self._data]
 
     def get_tile(self):
-        return Tile(self.id, to_int(self._north), to_int(self._south), to_int(self._west), to_int(self._east))
+        north = self._data[0]
+        south = self._data[-1]
+        west = [line[0] for line in self._data]
+        east = [line[-1] for line in self._data]
+
+        image = [line[1:-1] for line in self._data[1:-1]]
+
+        return Tile(self.id, to_int(north), to_int(south), to_int(west), to_int(east), image)
 
 
 def test():
@@ -104,7 +107,9 @@ def test():
         '...#......',
     ]
 
-    data = [list(line) ]
+    # data = [list(line) for line in data]
+    # for l in data:
+    #     print(''.join(l))
 
     tile_gen = TileGenerator(1337, data)
 
@@ -117,8 +122,7 @@ def test():
     tile = tile_gen.get_tile()
     tile.print()
 
-    print(tile)
-    assert tile.n == 4 and tile.e == 8 and tile.s == 32 and tile.w == 256
+    assert tile.n == 16 and tile.e == 2 and tile.s == 128 and tile.w == 64
 
 
 def tile_fits(tile: Tile, grid: List[List[Tile]], x: int, y: int):
@@ -142,7 +146,9 @@ def tile_fits(tile: Tile, grid: List[List[Tile]], x: int, y: int):
 
     return True
 
+
 matched_grid = None
+
 
 def find_solution(grid: List[List[Tile]], index: int, dim: int, tiles: Dict[int, List[Tile]], available: List[int]):
     global matched_grid
@@ -153,7 +159,9 @@ def find_solution(grid: List[List[Tile]], index: int, dim: int, tiles: Dict[int,
     if index == dim * dim:
         sol = grid[0][0].id * grid[-1][0].id * grid[0][-1].id * grid[-1][-1].id
         print('done found solution', sol)
-        matched_grid = grid.copy()
+        matched_grid = []
+        for line in grid:
+            matched_grid.append(line.copy())
         return
 
     x = index % dim
@@ -175,10 +183,10 @@ def find_solution(grid: List[List[Tile]], index: int, dim: int, tiles: Dict[int,
 
 
 if __name__ == '__main__':
-    # test()
+    test()
 
     tiles = {}
-    data = open('20-ex.input').read(30000)
+    data = open('20.input').read(30000)
     for tile in data.split('\n\n'):
         lines = tile.split('\n')
         if len(lines[-1]) == 0:  # kludge
@@ -219,5 +227,82 @@ if __name__ == '__main__':
 
     find_solution(grid, 0, dim, tiles, [*tiles.keys()])
 
+    image = []
+    for line in matched_grid:
+        for i in range(len(line[0].image[0])):  # all images are squares
+            image.append(''.join([''.join(tile.image[i]) for tile in line]))
+
+    class Monster:
+        def __init__(self, monster: List[str]):
+            self._height = len(monster)
+            self._width = len(monster[0])
+
+            self._coords = []
+
+            for y, line in enumerate(monster):
+                for x, ch in enumerate(line):
+                    if ch == '#':
+                        self._coords.append((x, y))
+
+        @property
+        def height(self):
+            return self._height
+
+        @property
+        def width(self):
+            return self._width
+
+        @property
+        def coords(self):
+            return self._coords
 
 
+    def get_roughness(image: List[str], monster: Monster):
+        monster_count = 0
+
+        image = image.copy()
+        for y in range(len(image) - monster.height):
+            for x in range(len(image[0]) - monster.width):
+                matches = 0
+                for coord in monster.coords:
+                    if image[coord[1] + y][coord[0] + x] == '#':
+                        matches += 1
+
+                if matches == len(monster.coords):
+                    monster_count += 1
+                    print('monster found at', x, y)
+                    for coord in monster.coords:
+                        nl = list(image[coord[1] + y])
+                        nl[coord[0] + x] = 'O'
+                        image[coord[1] + y] = ''.join(nl)
+
+        roughness = 0
+        for line in image:
+            roughness += line.count('#')
+        return roughness, monster_count
+
+
+    monster_str = ["                  # ",
+                   "#    ##    ##    ###",
+                   " #  #  #  #  #  #   "]
+    m = Monster(monster_str)
+
+    tgen = TileGenerator(0, image)
+
+    print('roughness', get_roughness(tgen.data, m))
+    tgen.rotate()
+    print('roughness', get_roughness(tgen.data, m))
+    tgen.rotate()
+    print('roughness', get_roughness(tgen.data, m))
+    tgen.rotate()
+    print('roughness', get_roughness(tgen.data, m))
+
+    tgen.flip()
+
+    print('roughness', get_roughness(tgen.data, m))
+    tgen.rotate()
+    print('roughness', get_roughness(tgen.data, m))
+    tgen.rotate()
+    print('roughness', get_roughness(tgen.data, m))
+    tgen.rotate()
+    print('roughness', get_roughness(tgen.data, m))
