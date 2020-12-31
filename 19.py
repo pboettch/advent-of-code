@@ -15,6 +15,13 @@ for rule in rules.split('\n'):
     if id == '0':
         id = 'start'
     else:
+        # part 2
+        if id == '8':
+            dep = "42 | 42 8"
+        elif id == '11':
+            dep = "42 31 | 42 11 31"
+        # part 2
+
         id = f'r{id}'
 
     parser_rules.append("{}: {}".format(id, numbers_re.sub(r'r\1', dep)))
