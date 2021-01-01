@@ -30,7 +30,7 @@ class CupInCircle:
         while True:
             if n.val == val:
                 return n
-            n = n.next
+            n = n.prev
             if n == self:
                 break
         return None
@@ -50,9 +50,15 @@ class CupInCircle:
 
 prev = None
 first = None  # start
-for i in '739862541':
-# for i in '389125467':
+
+input = '739862541'
+# input = '389125467'
+
+val_node = {}
+
+for i in list(input) + list(range(len(input) + 1, 1000001)):
     node = CupInCircle(int(i), prev, None)
+    val_node[int(i)] = node
 
     if prev is not None:
         prev.next = node
@@ -67,34 +73,30 @@ first.prev = prev
 prev.next = first
 
 input_len = len(first)
+
 print('len', input_len)
-print(first)
 
 current = first
-for move in range(100):
-    print('--', move + 1, '--', len(first))
-    print(first)
-
+count = 0
+for move in range(int(1e7)):
     # take out three cups
     three = current.next
 
     current.next = three.next.next.next
     three.next.next.next.prev = current
 
-    print('pick up ', three.to_str(3))
+    # print('pick up ', three.to_str(3))
 
-    dest_val = current.val - 1
+    dest_val = current.val
 
     while True:
-        dest = current.find(dest_val)
-        if dest is not None:
-            break
-        else:
-            dest_val -= 1
-            if dest_val < 0:
-                dest_val = input_len
+        dest_val -= 1
+        if dest_val < 1:
+            dest_val = input_len
 
-    print('dest', dest.val)
+        dest = val_node[dest_val]
+        if dest != three and dest != three.next and dest != three.next.next:
+            break
 
     dest.next.prev = three.next.next
     three.next.next.next = dest.next
@@ -104,5 +106,9 @@ for move in range(100):
 
     current = current.next
 
+    count += 1
+    if count % 10000 == 0:
+        print(count)
+
 one = first.find(1)
-print('part1', one.to_str()[1:])
+print('part2', one.next.val * one.next.next.val)
