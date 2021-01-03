@@ -2,10 +2,9 @@
 
 
 class CupInCircle:
-    def __init__(self, v: int, p, n):
-        self.val = v
-        self.prev = p
-        self.next = n
+    def __init__(self, val: int):
+        self.val = val
+        self.next = next
 
     def to_str(self, count=-1):
         s = ''
@@ -25,16 +24,6 @@ class CupInCircle:
     def __str__(self):
         return self.to_str()
 
-    def find(self, val):
-        n = self
-        while True:
-            if n.val == val:
-                return n
-            n = n.prev
-            if n == self:
-                break
-        return None
-
     def __len__(self):
         l = 0
 
@@ -48,7 +37,6 @@ class CupInCircle:
         return l
 
 
-prev = None
 first = None  # start
 
 input = '739862541'
@@ -56,21 +44,28 @@ input = '739862541'
 
 val_node = {}
 
+node_1 = None
+
+prev = None
+
 for i in list(input) + list(range(len(input) + 1, 1000001)):
-    node = CupInCircle(int(i), prev, None)
+    node = CupInCircle(int(i))
     val_node[int(i)] = node
 
-    if prev is not None:
-        prev.next = node
+    if i == '1':
+        node_1 = node
 
     if first is None:
         first = node
 
+    if prev is not None:
+        prev.next = node
+
     prev = node
 
+
 # close the circle
-first.prev = prev
-prev.next = first
+node.next = first
 
 input_len = len(first)
 
@@ -83,7 +78,6 @@ for move in range(int(1e7)):
     three = current.next
 
     current.next = three.next.next.next
-    three.next.next.next.prev = current
 
     # print('pick up ', three.to_str(3))
 
@@ -98,17 +92,14 @@ for move in range(int(1e7)):
         if dest != three and dest != three.next and dest != three.next.next:
             break
 
-    dest.next.prev = three.next.next
     three.next.next.next = dest.next
 
     dest.next = three
-    three.prev = dest
 
     current = current.next
 
     count += 1
-    if count % 10000 == 0:
+    if count % 100000 == 0:
         print(count)
 
-one = first.find(1)
-print('part2', one.next.val * one.next.next.val)
+print('part2', node_1.next.val * node_1.next.next.val)
