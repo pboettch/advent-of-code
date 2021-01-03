@@ -17,7 +17,7 @@ x = 0
 y = 0
 dir = 0
 
-for instr in open("12.input").readlines():
+for instr in open("12-ex.input").readlines():
     cmd = instr[0]
     val = int(instr[1:])
 
@@ -37,3 +37,41 @@ for instr in open("12.input").readlines():
 
 print('1', abs(x) + abs(y))
 
+
+ux = 10
+uy = 1
+
+x = 0
+y = 0
+
+for instr in open("12.input").readlines():
+    cmd = instr[0]
+    val = int(instr[1:])
+
+    if cmd == 'F':
+        x += val * ux
+        y += val * uy
+    elif cmd == 'N':
+        uy += val
+    elif cmd == 'S':
+        uy -= val
+    elif cmd == 'E':
+        ux += val
+    elif cmd == 'W':
+        ux -= val
+    elif cmd == 'R':
+        if val == 90:
+            ux, uy = uy, -ux
+        elif val == 180:
+            ux, uy = -ux, -uy
+        elif val == 270:
+            ux, uy = -uy, ux
+    elif cmd == 'L':
+        if val == 90:
+            ux, uy = -uy, ux
+        elif val == 180:
+            ux, uy = -ux, -uy
+        elif val == 270:
+            ux, uy = uy, -ux
+
+print('2', abs(x) + abs(y))
