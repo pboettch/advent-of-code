@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import itertools
 import re
-from typing import List
 
 
 def bitwise_subset1(num: int, bits: int):
@@ -31,9 +29,9 @@ class Floors:
         self.material = {}
         self.floors = []
 
-        self.seen_cache = {}
+        self.cache = {}
 
-        self.min_step = 63
+        self.min_step = -1
 
         microchip = []
         generator = []
@@ -90,16 +88,17 @@ class Floors:
         return id
 
     def solve(self, E: int = 0, step: int = 0):
-        # input()
-        # if step == 2:
-        #    return
+        id = self.id()
+        if id in self.cache and step >= self.cache[id]:
+            return
+
+        self.cache[id] = step
 
         if self.min_step != -1 and step > self.min_step:
             return
 
-        # print(step, len(self.floors[3]), self.total)
         if self.floors[3] == self.full_mask:
-            if self.min_step > step:
+            if self.min_step == -1 or self.min_step > step:
                 print('new min step', step)
                 self.min_step = step
 
@@ -108,7 +107,7 @@ class Floors:
         subsets_1 = bitwise_subset1(self.floors[E], self.shift * 2)
 
         if E < 3:
-            if not self.move(subsets_2, E, E + 1, step):
+            if not self.move(subsets_2, E, E + 1, step):  # try move of 1 element only no 2-element-move was done
                 self.move(subsets_1, E, E + 1, step)
 
         # if level 0 is empty, do not go back
@@ -128,21 +127,14 @@ class Floors:
             orig_floor = self.floors[E]
             self.floors[E] &= ~subset
 
-            # self.print_floor(E, '{} {} {} '.format(' ' * step, E, subset))
-
-            # print(' ' * step, E, orig_floor, '->', self.floors[E], '-', subset)
             if self.is_stable(E):  # removing element leave stable floor
                 orig = self.floors[e]
 
                 self.floors[e] |= subset
 
                 if self.is_stable(e):
-                    id = self.id()
-                    if id not in self.seen_cache or \
-                            self.seen_cache[id] > step:
-                        self.seen_cache[id] = step
-                        self.solve(e, step + 1)
-                        recursed = True
+                    self.solve(e, step + 1)
+                    recursed = True
 
                 self.floors[e] = orig
 
@@ -163,9 +155,9 @@ if __name__ == "__main__":
     f = Floors(open('11.input'))
     f.solve()  # finds but not stops at 31 - or too late
 
-    # print('part1', f.min_step)
+    print('part1', f.min_step, 'cache-size:', len(f.cache))
 
     f = Floors(open('11-2.input'))
     f.solve()
 
-    print('part2', f.min_step)
+    print('part2', f.min_step, 'cache-size:', len(f.cache))
