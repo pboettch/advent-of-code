@@ -21,7 +21,7 @@ if __name__ == "__main__":
     part2 = set()
 
     for l in open(sys.argv[1] if len(sys.argv) > 1 else '09-input').read().splitlines():
-        d, c = l.strip().split()
+        d, c = l.split()
         d = mv[d]
         c = int(c)
 
