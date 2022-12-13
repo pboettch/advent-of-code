@@ -2,35 +2,26 @@
 
 import sys
 import functools
-from copy import deepcopy
 
 
-def cmp(L, R):
-    while L and R:
-        l = L.pop(0)
-        r = R.pop(0)
-
-        if isinstance(l, int) and isinstance(r, int):
-            if l == r:
-                continue
-            if l < r:
-                return -1
-            if l > r:
-                return 1
-            continue
-
-        if isinstance(l, int):
-            l = [l]
-        elif isinstance(r, int):
-            r = [r]
-
-        if (v := cmp(l, r)) != 0:
-            return v
-
-    if len(L) == len(R):
-        return 0
-
-    return -1 if len(L) < len(R) else 1
+def cmp(L, R) -> int:
+    if isinstance(L, list) and isinstance(R, list):
+        for i in range(min(len(L), len(R))):
+            r = cmp(L[i], R[i])
+            if r != 0:
+                return r
+        return cmp(len(L), len(R))
+    elif isinstance(L, int) and isinstance(R, int):
+        if L == R:
+            return 0
+        if L < R:
+            return -1
+        if L > R:
+            return 1
+    elif isinstance(L, int):
+        return cmp([L], R)
+    elif isinstance(R, int):
+        return cmp(L, [R])
 
 
 if __name__ == "__main__":
@@ -38,18 +29,22 @@ if __name__ == "__main__":
     part2 = 0
 
     all_packets = []
-    for i, p in enumerate(open(sys.argv[1] if len(sys.argv) > 1 else '13-input').read().split('\n\n')):
-        if p:
-            a, b = [eval(t) for t in p.split('\n')]
+    C = open(sys.argv[1] if len(sys.argv) > 1 else '13-input').readlines()
+    n = 0
+    while C:
+        a, b, _, *C = C
+        a = eval(a)
+        b = eval(b)
+        n += 1
 
-            all_packets += [a, b]
-            if cmp(deepcopy(a), deepcopy(b)) == -1:
-                part1 += i + 1
+        all_packets += [a, b]
+        if cmp(a, b) == -1:
+            part1 += n
 
     A, B = [[2]], [[6]]
     all_packets += [A, B]
 
-    all_packets = sorted(all_packets, key=functools.cmp_to_key(lambda a, b: cmp(deepcopy(a), deepcopy(b))))
+    all_packets = sorted(all_packets, key=functools.cmp_to_key(cmp))
 
     part2 = (all_packets.index(A) + 1) * (all_packets.index(B) + 1)
 
