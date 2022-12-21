@@ -53,7 +53,7 @@ if __name__ == "__main__":
             visit(f, dim)
 
 
-    # visit recursively all empty fields and see if there are ct pube-sides visible
+    # visit recursively all empty fields and see if there are cube-sides visible
     visit((xs - delta, ys - delta, zs - delta),
           (xs - delta, ys - delta, zs - delta, xe + delta, ye + delta, ze + delta))
 
