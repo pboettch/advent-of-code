@@ -19,7 +19,7 @@ if __name__ == "__main__":
         if op == '+': return l + r
         if op == '-': return l - r
         if op == '*': return l * r
-        if op == '/': return l // r
+        if op == '/': return l / r
 
         assert False
 
@@ -81,8 +81,6 @@ if __name__ == "__main__":
         side = r
         target = lr2
 
-    print('target', target)
-
     v = int(2 ** 64)
 
     instrs['humn'] = v
@@ -98,4 +96,4 @@ if __name__ == "__main__":
         else:
             instrs['humn'] -= v * dir
 
-    print('part2', instrs['humn'], r, target)
+    print('part2', instrs['humn'])
